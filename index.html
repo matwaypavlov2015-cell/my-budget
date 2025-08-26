@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Мой Бюджет</title>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#4CAF50" />
+</head>
+<body>
+  <h1>Мой Бюджет</h1>
+  <p id="status">Загрузка данных...</p>
+
+  <div style="margin-top: 20px;">
+    <h3>Добавить расход</h3>
+    <input type="number" id="amount" placeholder="Сумма" />
+    <input type="text" id="category" placeholder="Категория (кофе, бензин...)" />
+    <button onclick="addExpense()">Добавить</button>
+  </div>
+
+  <script>
+    // ⚠️ Замени YOUR_SCRIPT_ID на настоящий ID из Google Apps Script
+    const API_URL = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec';
+
+    async function load() {
+      try {
+        const response = await fetch(API_URL);
+        const data = await response.json();
+        document.getElementById('status').textContent = `Баланс: ${data.balance || 0} ₽`;
+      } catch (e) {
+        document.getElementById('status').textContent = 'Ошибка: не удалось загрузить данные';
+      }
+    }
+
+    async function addExpense() {
+      const amount = document.getElementById('amount').value;
+      const category = document.getElementById('category').value;
+      
+      if (!amount || !category) {
+        alert('Заполни все поля');
+        return;
+      }
+
+      const result = await fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify({
+          type: 'expense',
+          date: new Date().toISOString().split('T')[0],
+          amount: parseFloat(amount),
+          category: category,
+          note: 'Добавлено через PWA'
+        })
+      }).then(r => r.json());
+
+      alert('Расход добавлен!');
+      location.reload();
+    }
+
+    window.onload = load;
+  </script>
+</body>
+</html>

@@ -3,59 +3,167 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Мой Бюджет</title>
+  <title>Банк Скруджа</title>
   <link rel="manifest" href="manifest.json" />
-  <meta name="theme-color" content="#4CAF50" />
+  <meta name="theme-color" content="#121212" />
   <style>
-    body {
-      font-family: -apple-system, sans-serif;
-      padding: 20px;
-      background: #f9f9f9;
+    /* === Глобальные стили === */
+    * {
       margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Helvetica Neue', sans-serif;
+      background: #121212;
+      color: #B0BEC5;
+      padding: 20px;
+      line-height: 1.6;
+    }
+
+    h1, h2, h3 {
+      color: #F8F9FA;
+      font-weight: 600;
+    }
+
+    /* === Шапка === */
+    .header-card {
+      background: #1E1E1E;
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      border: 1px solid #333;
+    }
+
+    .subtitle {
+      font-size: 14px;
+      color: #90A4AE;
+      margin: 4px 0 16px;
+    }
+
+    .balance-box {
+      background: #2C2C2C;
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+    }
+
+    .label {
+      font-size: 14px;
+      color: #B0BEC5;
+    }
+
+    .balance {
+      font-size: 24px;
+      font-weight: 700;
+      color: #FFD700; /* Золото — только для баланса */
+    }
+
+    /* === Карточки === */
     .card {
-      background: white;
-      padding: 15px;
-      margin: 10px 0;
-      border-radius: 10px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      background: #1E1E1E;
+      border-radius: 16px;
+      padding: 20px;
+      margin: 16px 0;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      border: 1px solid #333;
     }
-    input, select, button {
-      padding: 10px;
-      margin: 5px 0;
-      width: 100%;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      font-size: 16px;
-    }
+
+    /* === Кнопки === */
     button {
-      background: #4CAF50;
+      background: #1A237E;
       color: white;
       border: none;
+      padding: 14px;
+      border-radius: 12px;
+      font-weight: 600;
+      width: 100%;
+      font-size: 16px;
       cursor: pointer;
+      transition: all 0.2s ease;
     }
+
     button:hover {
-      background: #45a049;
+      background: #0D1B50;
+      transform: translateY(-1px);
     }
+
+    /* === Поля ввода === */
+    input, select {
+      padding: 14px;
+      margin: 8px 0;
+      width: 100%;
+      border: 1px solid #333;
+      border-radius: 12px;
+      background: #2C2C2C;
+      color: #F8F9FA;
+      font-size: 16px;
+    }
+
+    input::placeholder, select {
+      color: #78909C;
+    }
+
+    /* === Прогресс-бар для желаний === */
+    .progress-container {
+      margin: 10px 0;
+    }
+
+    .progress-bar {
+      height: 6px;
+      background: #333;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: #FFD700;
+      width: 0%;
+      transition: width 0.4s ease;
+    }
+
+    /* === Списки === */
     ul {
       list-style: none;
-      padding: 0;
     }
+
     li {
-      padding: 8px 0;
-      border-bottom: 1px solid #eee;
+      padding: 12px 0;
+      border-bottom: 1px solid #333;
     }
-    .warning {
-      color: #d32f2f;
-      font-weight: bold;
+
+    /* === Мудрость Скруджа === */
+    .wisdom {
+      text-align: center;
+      font-style: italic;
+      color: #B0BEC5;
+      font-size: 14px;
+      margin: 30px 0;
+      padding: 16px;
+      border-top: 1px solid #333;
+      border-bottom: 1px solid #333;
+    }
+
+    /* === Золотой акцент (умеренно) === */
+    .gold-accent {
+      border: 1px solid #FFD700;
+      color: #FFD700;
     }
   </style>
 </head>
 <body>
-  <h1>Мой Бюджет</h1>
 
-  <div class="card">
-    <h3>Баланс на сегодня: <span id="balance">Загрузка...</span></h3>
+  <!-- Шапка -->
+  <div class="header-card">
+    <h2>Добро пожаловать, Павел</h2>
+    <p class="subtitle">Персональный финансовый консультант</p>
+    <div class="balance-box">
+      <span class="label">Доступно сегодня</span>
+      <span class="balance" id="balance">Загрузка...</span>
+    </div>
   </div>
 
   <!-- Расход -->
@@ -71,7 +179,7 @@
   <div class="card">
     <h3>Новый доход</h3>
     <input type="number" id="incAmount" placeholder="Сумма" />
-    <input type="text" id="incSource" placeholder="Источник (наличные, подарок)" />
+    <input type="text" id="incSource" placeholder="Источник" />
     <input type="text" id="incNote" placeholder="Примечание" />
     <button onclick="addIncome()">Добавить</button>
   </div>
@@ -102,11 +210,16 @@
     <ul id="creditsList"></ul>
   </div>
 
+  <!-- Мудрость Скруджа -->
+  <div class="wisdom">
+    <p>«Богатство — это не то, сколько ты заработал, а то, сколько ты сохранил.»</p>
+    <small>— Скрудж Макдак, основатель Банка Макдаков</small>
+  </div>
+
   <script>
-    // ✅ Твой API URL
+    // ✅ Твой API
     const API_URL = 'https://script.google.com/macros/s/AKfycbzWTKklpS4cHXmzgriHWlB73Io2jddAv28E4D8k2HUUc6pu4WyjODgNFgBnUbHkms_yRg/exec';
 
-    // Загрузка данных
     async function load() {
       try {
         const response = await fetch(API_URL);
@@ -114,31 +227,42 @@
         
         document.getElementById('balance').textContent = data.balance + ' ₽';
 
-        // Желания
+        // Желания с прогресс-баром
         const wishesList = document.getElementById('wishesList');
         wishesList.innerHTML = '';
         data.wishes.forEach(w => {
-          wishesList.innerHTML += `<li>${w.name} — ${w.cost} ₽ (приоритет: ${w.priority})</li>`;
+          const progress = Math.min(100, (data.balance / w.cost) * 100).toFixed(0);
+          const color = progress >= 100 ? '#4CAF50' : '#FFD700';
+          wishesList.innerHTML += `
+            <li>
+              <strong>${w.name}</strong> — ${w.cost} ₽ (${w.priority})
+              <div class="progress-container">
+                <div class="progress-bar">
+                  <div class="progress-fill" style="width:${progress}%; background:${color};"></div>
+                </div>
+              </div>
+            </li>`;
         });
 
         // Кредиты
         const creditsList = document.getElementById('creditsList');
         creditsList.innerHTML = '';
         data.credits.forEach(c => {
-          creditsList.innerHTML += `<li>${c.name} — ${c.amount} ₽, день: ${c.day}, до: ${c.lastDate || '∞'}</li>`;
+          creditsList.innerHTML += `
+            <li>
+              <strong>${c.name}</strong> — ${c.amount} ₽, день: ${c.day}, до: ${c.lastDate || '∞'}
+            </li>`;
         });
       } catch (e) {
         document.getElementById('balance').textContent = 'Ошибка загрузки';
-        console.error('Ошибка загрузки данных:', e);
+        console.error('Ошибка:', e);
       }
     }
 
-    // Добавить расход
     function addExpense() {
       const amount = document.getElementById('expAmount').value;
       const category = document.getElementById('expCategory').value;
       if (!amount || !category) return alert('Заполните все поля');
-
       fetch(API_URL, {
         method: 'POST',
         body: JSON.stringify({
@@ -148,24 +272,13 @@
           category,
           note: document.getElementById('expNote').value
         })
-      })
-      .then(r => r.json())
-      .then(() => {
-        alert('Расход добавлен!');
-        location.reload();
-      })
-      .catch(e => {
-        alert('Ошибка: не удалось добавить расход');
-        console.error(e);
-      });
+      }).then(() => { alert('Расход добавлен!'); location.reload(); });
     }
 
-    // Добавить доход
     function addIncome() {
       const amount = document.getElementById('incAmount').value;
       const source = document.getElementById('incSource').value;
       if (!amount || !source) return alert('Заполните все поля');
-
       fetch(API_URL, {
         method: 'POST',
         body: JSON.stringify({
@@ -175,24 +288,13 @@
           source,
           note: document.getElementById('incNote').value
         })
-      })
-      .then(r => r.json())
-      .then(() => {
-        alert('Доход добавлен!');
-        location.reload();
-      })
-      .catch(e => {
-        alert('Ошибка: не удалось добавить доход');
-        console.error(e);
-      });
+      }).then(() => { alert('Доход добавлен!'); location.reload(); });
     }
 
-    // Добавить желание
     function addWish() {
       const name = document.getElementById('wishName').value;
       const cost = document.getElementById('wishCost').value;
       if (!name || !cost) return alert('Заполните все поля');
-
       fetch(API_URL, {
         method: 'POST',
         body: JSON.stringify({
@@ -201,19 +303,9 @@
           cost: parseFloat(cost),
           priority: document.getElementById('wishPriority').value
         })
-      })
-      .then(r => r.json())
-      .then(() => {
-        alert('Желание добавлено!');
-        location.reload();
-      })
-      .catch(e => {
-        alert('Ошибка: не удалось добавить желание');
-        console.error(e);
-      });
+      }).then(() => { alert('Желание добавлено!'); location.reload(); });
     }
 
-    // Загрузить при открытии
     window.onload = load;
   </script>
 </body>

@@ -1,59 +1,77 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Мой Бюджет</title>
-  <link rel="manifest" href="manifest.json" />
-  <meta name="theme-color" content="#4CAF50" />
-</head>
-<body>
-  <h1>Мой Бюджет</h1>
-  <p id="status">Загрузка данных...</p>
+ument.getElementById('expAmount').value;
+      const category = document.getElementById('expCategory').value;
+      if (!amount || !category) return alert('Заполните все поля');
 
-  <div style="margin-top: 20px;">
-    <h3>Добавить расход</h3>
-    <input type="number" id="amount" placeholder="Сумма" />
-    <input type="text" id="category" placeholder="Категория (кофе, бензин...)" />
-    <button onclick="addExpense()">Добавить</button>
-  </div>
-
-  <script>
-    // ⚠️ Замени YOUR_SCRIPT_ID на настоящий ID из Google Apps Script
-    const API_URL = 'https://script.google.com/macros/s/AKfycbzWTKklpS4cHXmzgriHWlB73Io2jddAv28E4D8k2HUUc6pu4WyjODgNFgBnUbHkms_yRg/exec';
-
-    async function load() {
-      try {
-        const response = await fetch(API_URL);
-        const data = await response.json();
-        document.getElementById('status').textContent = `Баланс: ${data.balance || 0} ₽`;
-      } catch (e) {
-        document.getElementById('status').textContent = 'Ошибка: не удалось загрузить данные';
-      }
-    }
-
-    async function addExpense() {
-      const amount = document.getElementById('amount').value;
-      const category = document.getElementById('category').value;
-      
-      if (!amount || !category) {
-        alert('Заполни все поля');
-        return;
-      }
-
-      const result = await fetch(API_URL, {
+      fetch(API_URL, {
         method: 'POST',
         body: JSON.stringify({
           type: 'expense',
           date: new Date().toISOString().split('T')[0],
           amount: parseFloat(amount),
-          category: category,
-          note: 'Добавлено через PWA'
+          category,
+          note: document.getElementById('expNote').value
         })
-      }).then(r => r.json());
+      })
+      .then(r => r.json())
+      .then(() => {
+        alert('Расход добавлен!');
+        location.reload();
+      })
+      .catch(e => {
+        alert('Ошибка: не удалось добавить расход');
+        console.error(e);
+      });
+    }
 
-      alert('Расход добавлен!');
-      location.reload();
+    function addIncome() {
+      const amount = document.getElementById('incAmount').value;
+      const source = document.getElementById('incSource').value;
+      if (!amount || !source) return alert('Заполните все поля');
+
+      fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify({
+          type: 'income',
+          date: new Date().toISOString().split('T')[0],
+          amount: parseFloat(amount),
+          source,
+          note: document.getElementById('incNote').value
+        })
+      })
+      .then(r => r.json())
+      .then(() => {
+        alert('Доход добавлен!');
+        location.reload();
+      })
+      .catch(e => {
+        alert('Ошибка: не удалось добавить доход');
+        console.error(e);
+      });
+    }
+
+    function addWish() {
+      const name = document.getElementById('wishName').value;
+      const cost = document.getElementById('wishCost').value;
+      if (!name || !cost) return alert('Заполните все поля');
+
+      fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify({
+          type: 'wish',
+          name,
+          cost: parseFloat(cost),
+          priority: document.getElementById('wishPriority').value
+        })
+      })
+      .then(r => r.json())
+      .then(() => {
+        alert('Желание добавлено!');
+        location.reload();
+      })
+      .catch(e => {
+        alert('Ошибка: не удалось добавить желание');
+        console.error(e);
+      });
     }
 
     window.onload = load;

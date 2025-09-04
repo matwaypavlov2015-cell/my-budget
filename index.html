@@ -184,32 +184,16 @@
     <button onclick="addIncome()">Добавить</button>
   </div>
 
-  <!-- Желание -->
-  <div class="card">
-    <h3>Желание</h3>
-    <input type="text" id="wishName" placeholder="Часы, костюм..." />
-    <input type="number" id="wishCost" placeholder="Стоимость" />
-    <select id="wishPriority">
-      <option value="срочно">Срочно</option>
-      <option value="этот месяц">Этот месяц</option>
-      <option value="этот год">Этот год</option>
-      <option value="когда-нибудь">Когда-нибудь</option>
-    </select>
-    <button onclick="addWish()">Добавить</button>
+  <!-- Предупреждение о будущем дефиците -->
+  <div class="card" id="deficitWarningCard" style="display:none; border-left: 5px solid #d32f2f;">
+    <h3 style="color:#d32f2f;">⚠️ Внимание: возможный дефицит</h3>
+    <p id="deficitWarningText"></p>
+    <div id="deficitDetailsSection" style="margin-top: 10px; display:none;">
+      <p><strong>Не хватит на:</strong></p>
+      <ul id="deficitDetailsList"></ul>
+    </div>
   </div>
-
-  <!-- Желания -->
-  <div class="card">
-    <h3>Желания</h3>
-    <ul id="wishesList"></ul>
-  </div>
-
-  <!-- Кредиты -->
-  <div class="card">
-    <h3>Кредиты</h3>
-    <ul id="creditsList"></ul>
-  </div>
-
+  
   <!-- Мудрость Скруджа -->
   <div class="wisdom">
     <p>«Богатство — это не то, сколько ты заработал, а то, сколько ты сохранил.»</p>
@@ -227,37 +211,31 @@
         
         document.getElementById('balance').textContent = data.balance + ' ₽';
 
-        // Желания с прогресс-баром
-        const wishesList = document.getElementById('wishesList');
-        wishesList.innerHTML = '';
-        data.wishes.forEach(w => {
-          const progress = Math.min(100, (data.balance / w.cost) * 100).toFixed(0);
-          const color = progress >= 100 ? '#4CAF50' : '#FFD700';
-          wishesList.innerHTML += `
-            <li>
-              <strong>${w.name}</strong> — ${w.cost} ₽ (${w.priority})
-              <div class="progress-container">
-                <div class="progress-bar">
-                  <div class="progress-fill" style="width:${progress}%; background:${color};"></div>
-                </div>
-              </div>
-            </li>`;
-        });
+         // --- Отображение предупреждения о дефиците ---
+        const deficitCard = document.getElementById('deficitWarningCard');
+        const deficitText = document.getElementById('deficitWarningText');
+        const detailsSection = document.getElementById('deficitDetailsSection');
+        const detailsList = document.getElementById('deficitDetailsList');
 
-        // Кредиты
-        const creditsList = document.getElementById('creditsList');
-        creditsList.innerHTML = '';
-        data.credits.forEach(c => {
-          creditsList.innerHTML += `
-            <li>
-              <strong>${c.name}</strong> — ${c.amount} ₽, день: ${c.day}, до: ${c.lastDate || '∞'}
-            </li>`;
-        });
-      } catch (e) {
-        document.getElementById('balance').textContent = 'Ошибка загрузки';
-        console.error('Ошибка:', e);
-      }
-    }
+        if (data.negativeDateInfo) {
+            deficitCard.style.display = 'block';
+            deficitText.textContent = `Баланс станет отрицательным ${data.negativeDateInfo.date}: ${data.negativeDateInfo.balance.toFixed(2)} ₽`;
+
+            // Отображение деталей (если есть)
+            if (data.deficitDetails && data.deficitDetails.length > 0) {
+                detailsSection.style.display = 'block';
+                detailsList.innerHTML = ''; // Очищаем список
+                data.deficitDetails.forEach(payment => {
+                    const li = document.createElement('li');
+                    li.textContent = `${payment.name} (${payment.amount.toFixed(2)} ₽)`;
+                    detailsList.appendChild(li);
+                });
+            } else {
+                detailsSection.style.display = 'none';
+            }
+        } else {
+            deficitCard.style.display = 'none';
+        }
 
     function addExpense() {
       const amount = document.getElementById('expAmount').value;

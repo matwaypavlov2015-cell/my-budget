@@ -152,6 +152,15 @@
       border: 1px solid #FFD700;
       color: #FFD700;
     }
+
+    /* === Стиль для карточки дефицита === */
+    #deficitWarningCard {
+      border-left: 5px solid #d32f2f;
+    }
+
+    #deficitWarningCard h3 {
+      color: #d32f2f;
+    }
   </style>
 </head>
 <body>
@@ -163,6 +172,16 @@
     <div class="balance-box">
       <span class="label">Доступно сегодня</span>
       <span class="balance" id="balance">Загрузка...</span>
+    </div>
+  </div>
+
+  <!-- Предупреждение о будущем дефиците -->
+  <div class="card" id="deficitWarningCard" style="display:none;">
+    <h3>⚠️ Внимание: возможный дефицит</h3>
+    <p id="deficitWarningText"></p>
+    <div id="deficitDetailsSection" style="margin-top: 10px; display:none;">
+      <p><strong>Не хватит на:</strong></p>
+      <ul id="deficitDetailsList"></ul>
     </div>
   </div>
 
@@ -184,16 +203,20 @@
     <button onclick="addIncome()">Добавить</button>
   </div>
 
-  <!-- Предупреждение о будущем дефиците -->
-  <div class="card" id="deficitWarningCard" style="display:none; border-left: 5px solid #d32f2f;">
-    <h3 style="color:#d32f2f;">⚠️ Внимание: возможный дефицит</h3>
-    <p id="deficitWarningText"></p>
-    <div id="deficitDetailsSection" style="margin-top: 10px; display:none;">
-      <p><strong>Не хватит на:</strong></p>
-      <ul id="deficitDetailsList"></ul>
-    </div>
+  <!-- Желание -->
+  <div class="card">
+    <h3>Желание</h3>
+    <input type="text" id="wishName" placeholder="Часы, костюм..." />
+    <input type="number" id="wishCost" placeholder="Стоимость" />
+    <select id="wishPriority">
+      <option value="срочно">Срочно</option>
+      <option value="этот месяц">Этот месяц</option>
+      <option value="этот год">Этот год</option>
+      <option value="когда-нибудь">Когда-нибудь</option>
+    </select>
+    <button onclick="addWish()">Добавить</button>
   </div>
-  
+
   <!-- Мудрость Скруджа -->
   <div class="wisdom">
     <p>«Богатство — это не то, сколько ты заработал, а то, сколько ты сохранил.»</p>
@@ -201,41 +224,60 @@
   </div>
 
   <script>
-    // ✅ Твой API
+    // ✅ Твой API (убедись, что НЕТ пробелов в конце!)
     const API_URL = 'https://script.google.com/macros/s/AKfycbzstMkuR-7b-hhyjNemORTZvENGVzWFrwACpoZWvOMnOYOvxv8XzATQGcsrTwBIkgkI5g/exec';
 
     async function load() {
       try {
+        console.log('Запрос к API:', API_URL);
         const response = await fetch(API_URL);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
         const data = await response.json();
-        
-        document.getElementById('balance').textContent = data.balance + ' ₽';
+        console.log('Данные от API:', data);
 
-         // --- Отображение предупреждения о дефиците ---
+        // --- Отображение баланса ---
+        document.getElementById('balance').textContent = (data.balance || 0) + ' ₽';
+
+        // --- Отображение предупреждения о дефиците ---
         const deficitCard = document.getElementById('deficitWarningCard');
         const deficitText = document.getElementById('deficitWarningText');
         const detailsSection = document.getElementById('deficitDetailsSection');
         const detailsList = document.getElementById('deficitDetailsList');
 
         if (data.negativeDateInfo) {
+            console.log('Показываем предупреждение о дефиците');
             deficitCard.style.display = 'block';
-            deficitText.textContent = `Баланс станет отрицательным ${data.negativeDateInfo.date}: ${data.negativeDateInfo.balance.toFixed(2)} ₽`;
+            deficitText.textContent = `Баланс станет отрицательным ${data.negativeDateInfo.date}: ${parseFloat(data.negativeDateInfo.balance).toFixed(2)} ₽`;
 
             // Отображение деталей (если есть)
             if (data.deficitDetails && data.deficitDetails.length > 0) {
+                console.log('Показываем детали дефицита');
                 detailsSection.style.display = 'block';
                 detailsList.innerHTML = ''; // Очищаем список
                 data.deficitDetails.forEach(payment => {
                     const li = document.createElement('li');
-                    li.textContent = `${payment.name} (${payment.amount.toFixed(2)} ₽)`;
+                    li.textContent = `${payment.name} (${parseFloat(payment.amount).toFixed(2)} ₽)`;
                     detailsList.appendChild(li);
                 });
             } else {
+                console.log('Скрываем детали дефицита (пусто)');
                 detailsSection.style.display = 'none';
             }
         } else {
+            console.log('Скрываем предупреждение о дефиците (не найдено)');
             deficitCard.style.display = 'none';
         }
+
+      } catch (e) {
+        document.getElementById('balance').textContent = 'Ошибка загрузки';
+        console.error('Ошибка загрузки данных:', e);
+        // Даже при ошибке скрываем карточку дефицита
+        document.getElementById('deficitWarningCard').style.display = 'none';
+      }
+    }
+
 
     function addExpense() {
       const amount = document.getElementById('expAmount').value;
@@ -250,7 +292,16 @@
           category,
           note: document.getElementById('expNote').value
         })
-      }).then(() => { alert('Расход добавлен!'); location.reload(); });
+      })
+      .then(r => r.json())
+      .then(() => {
+        alert('Расход добавлен!');
+        location.reload();
+      })
+      .catch(e => {
+        alert('Ошибка: не удалось добавить расход');
+        console.error(e);
+      });
     }
 
     function addIncome() {
@@ -266,7 +317,16 @@
           source,
           note: document.getElementById('incNote').value
         })
-      }).then(() => { alert('Доход добавлен!'); location.reload(); });
+      })
+      .then(r => r.json())
+      .then(() => {
+        alert('Доход добавлен!');
+        location.reload();
+      })
+      .catch(e => {
+        alert('Ошибка: не удалось добавить доход');
+        console.error(e);
+      });
     }
 
     function addWish() {
@@ -281,7 +341,16 @@
           cost: parseFloat(cost),
           priority: document.getElementById('wishPriority').value
         })
-      }).then(() => { alert('Желание добавлено!'); location.reload(); });
+      })
+      .then(r => r.json())
+      .then(() => {
+        alert('Желание добавлено!');
+        location.reload();
+      })
+      .catch(e => {
+        alert('Ошибка: не удалось добавить желание');
+        console.error(e);
+      });
     }
 
     window.onload = load;

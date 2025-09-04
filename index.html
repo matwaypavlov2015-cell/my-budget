@@ -224,7 +224,7 @@
   </div>
 
   <script>
-    // ✅ Твой API (убедись, что НЕТ пробелов в конце!)
+    // ✅ Твой API (убедись, что НЕТ пробелов!)
     const API_URL = 'https://script.google.com/macros/s/AKfycbzstMkuR-7b-hhyjNemORTZvENGVzWFrwACpoZWvOMnOYOvxv8XzATQGcsrTwBIkgkI5g/exec';
 
     async function load() {
@@ -258,7 +258,7 @@
                 detailsList.innerHTML = ''; // Очищаем список
                 data.deficitDetails.forEach(payment => {
                     const li = document.createElement('li');
-                    li.textContent = `${payment.name} (${parseFloat(payment.amount).toFixed(2)} ₽)`;
+                    li.textContent = `${payment.name} (${parseFloat(payment.amount).toFixed(2)} ₽) — ${payment.paymentDate}`;
                     detailsList.appendChild(li);
                 });
             } else {
